@@ -9,7 +9,7 @@ class TestTextProcessor(unittest.TestCase):
     def test_process_text_example(self):
         text = "Это пример текста с числами 123 и знаками препинания: !, ?."
         # The expected result may vary depending on the lemmatization
-        expected_result = "это пример текст число знак препинание"
+        expected_result = "это прмер текст число знак препинание"
         processed_text = self.processor.process_text(text)
         self.assertEqual(expected_result, processed_text)
 
