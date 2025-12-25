@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Python with cache
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest
+
+    - name: Cache NLTK data
+      id: cache-nltk
+      uses: actions/cache@v3
+      with:
+        path: ~/nltk_data
+        key: ${{ runner.os }}-nltk-data
+        restore-keys: |
+          ${{ runner.os }}-nltk-data
+
+    - name: Download NLTK data if not cached
+      if: steps.cache-nltk.outputs.cache-hit != 'true'
+      run: |
+        python -c "import nltk; nltk.download('stopwords', quiet=True)"
+
+    - name: Run tests
+      run: |
+        python -m pytest -v
