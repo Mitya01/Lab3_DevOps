@@ -62,4 +62,4 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          python -m pytest --cov=spam_classifier --cov-report=xml --verbose  # ИСПРАВЛЕНО
+          python -m pytest tests/
