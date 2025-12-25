@@ -1,29 +1,64 @@
-name: CS102 Workflow
+name: Python Spam Classifier CI/CD Pipeline  # ИСПРАВЛЕНО
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.11.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11.9'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install black mypy pandas boddle pytest nltk pymorphy3 deep-translator scikit-learn
-    - name: Download NLTK data
-      run: |
-        python -c "import nltk; nltk.download('stopwords')"
-    - name: Install project dependencies
-      run: |
-        if [ -f ${{ github.head_ref }}/requirements.txt ];
-        then
-          pip install -r ${{ github.head_ref }}/requirements.txt
-        fi
-    - name: Run unittests
-      run: |
-        python -m pytest
+      - uses: actions/checkout@v4  # ИСПРАВЛЕНО
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5  # ИСПРАВЛЕНО
+        with:
+          python-version: '3.11'
+          cache: 'pip'  # ИСПРАВЛЕНО
+
+      - name: Install linting dependencies
+        run: |
+          pip install black mypy
+
+      - name: Run black formatting check
+        run: |
+          python -m black --check .
+
+      - name: Run mypy type checking
+        run: |
+          python -m mypy --ignore-missing-imports .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # ИСПРАВЛЕНО
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5  # ИСПРАВЛЕНО
+        with:
+          python-version: '3.11'
+          cache: 'pip'  # ИСПРАВЛЕНО
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # ИСПРАВЛЕНО
+          pip install pytest
+
+      - name: Cache NLTK data
+        uses: actions/cache@v3  # ИСПРАВЛЕНО
+        with:
+          path: ~/nltk_data
+          key: ${{ runner.os }}-nltk-data
+          restore-keys: |
+            ${{ runner.os }}-nltk-data
+
+      - name: Download NLTK data
+        run: |
+          python -c "import nltk; nltk.download('stopwords', quiet=True)"  # ИСПРАВЛЕНО
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/
